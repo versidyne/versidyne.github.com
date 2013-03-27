@@ -1,210 +1,52 @@
 <!DOCTYPE html>
-
 <html>
   <head>
-    <title>Versidyne Open Source Division</title>
-    <link rel="stylesheet" type="text/css" href="assets/reset.css">
-    <link rel="stylesheet" type="text/css" href="assets/grid.css">
-    <link rel="stylesheet" type="text/css" href="assets/style.css">
-    <script type="text/javascript">
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
 
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-37213453-10']);
-  _gaq.push(['_trackPageview']);
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
 
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-    </script>
-    <script type="text/javascript" src="assets/jquery-1.7.1.min.js"></script>
-    <script type="text/javascript" src="assets/strftime.js"></script>
-    <script type="text/javascript">
-    (function ($, undefined) {
-
-      // Put custom repo URL's in this object, keyed by repo name.
-      var repoUrls = {
-        "vexis": "http://versidyne.github.com/vexis/",
-        "vexis-os": "http://versidyne.github.com/vexis-os/",
-        "vexis-windows": "http://versidyne.github.com/vexis-windows/",
-        "vexis-android": "http://versidyne.github.com/vexis-android/",
-        "versilis": "http://versidyne.github.com/versilis/"
-      };
-
-      function repoUrl(repo) {
-        return repoUrls[repo.name] || repo.html_url;
-      }
-
-      // Put custom repo descriptions in this object, keyed by repo name.
-      var repoDescriptions = {
-        "versidyne.github.com": "The source code for this page",
-        "vexis": "An HTML5, CSS3, and JS Content Management System designed to kickstart development of webapps and sites",
-        "vexis-os": "An ASM / C Universal Operating System designed to support development in various fields of science and consumer based technology",
-        "vexis-windows": "A VB.Net Instant Messaging System designed to securely ease communication between personell, computers, file systems, etc",
-        "vexis-android": "A Java Mobile App designed to control the Vexis Infrastructure",
-        "versilis": "A C++ Native Cross-Platform Library designed to smooth the transition for cross-platform compiling"
-      };
-
-      function repoDescription(repo) {
-        return repoDescriptions[repo.name] || repo.description;
-      }
-
-      function addRecentlyUpdatedRepo(repo) {
-        var $item = $("<li>");
-
-        var $name = $("<a>").attr("href", repo.html_url).text(repo.name);
-        $item.append($("<span>").addClass("name").append($name));
-
-        var $time = $("<a>").attr("href", repo.html_url + "/commits").text(strftime("%h %e, %Y", repo.pushed_at));
-        $item.append($("<span>").addClass("time").append($time));
-
-        $item.append('<span class="bullet">&sdot;</span>');
-
-        var $watchers = $("<a>").attr("href", repo.html_url + "/watchers").text(repo.watchers + " stargazers");
-        $item.append($("<span>").addClass("watchers").append($watchers));
-
-        $item.append('<span class="bullet">&sdot;</span>');
-
-        var $forks = $("<a>").attr("href", repo.html_url + "/network").text(repo.forks + " forks");
-        $item.append($("<span>").addClass("forks").append($forks));
-
-        $item.appendTo("#recently-updated-repos");
-      }
-
-      function addRepo(repo) {
-        var $item = $("<li>").addClass("repo grid-1 " + (repo.language || '').toLowerCase());
-        var $link = $("<a>").attr("href", repoUrl(repo)).appendTo($item);
-        $link.append($("<h2>").text(repo.name));
-        $link.append($("<h3>").text(repo.language));
-        $link.append($("<p>").text(repoDescription(repo)));
-        $item.appendTo("#repos");
-      }
-
-      function addRepos(repos, page) {
-        repos = repos || [];
-        page = page || 1;
-
-        var uri = "https://api.github.com/orgs/versidyne/repos?callback=?"
-                + "&per_page=100"
-                + "&page="+page;
-
-        $.getJSON(uri, function (result) {
-          if (result.data && result.data.length > 0) {
-            repos = repos.concat(result.data);
-            addRepos(repos, page + 1);
-          }
-          else {
-            $(function () {
-              $("#num-repos").text(repos.length);
-
-              // Convert pushed_at to Date.
-              $.each(repos, function (i, repo) {
-                repo.pushed_at = new Date(repo.pushed_at);
-
-                var weekHalfLife  = 1.146 * Math.pow(10, -9);
-
-                var pushDelta    = (new Date) - Date.parse(repo.pushed_at);
-                var createdDelta = (new Date) - Date.parse(repo.created_at);
-
-                var weightForPush = 1;
-                var weightForWatchers = 1.314 * Math.pow(10, 7);
-
-                repo.hotness = weightForPush * Math.pow(Math.E, -1 * weekHalfLife * pushDelta);
-                repo.hotness += weightForWatchers * repo.watchers / createdDelta;
-              });
-
-              // Sort by highest # of watchers.
-              repos.sort(function (a, b) {
-                if (a.hotness < b.hotness) return 1;
-                if (b.hotness < a.hotness) return -1;
-                return 0;
-              });
-
-              $.each(repos, function (i, repo) {
-                addRepo(repo);
-              });
-
-              // Sort by most-recently pushed to.
-              repos.sort(function (a, b) {
-                if (a.pushed_at < b.pushed_at) return 1;
-                if (b.pushed_at < a.pushed_at) return -1;
-                return 0;
-              });
-
-              $.each(repos.slice(0, 3), function (i, repo) {
-                addRecentlyUpdatedRepo(repo);
-              });
-            });
-          }
-        });
-      }
-      addRepos();
-
-      $.getJSON("https://api.github.com/orgs/versidyne/members?callback=?", function (result) {
-        var members = result.data;
-
-        $(function () {
-          $("#num-members").text(members.length);
-        });
-      });
-
-      function randomItem(array) {
-        return array[Math.floor(Math.random() * array.length)];
-      }
-
-      var sizes = ["smaller", "small", "medium", "large", "fat"];
-
-      var sizeDimensions = {
-        "smaller": 50,
-        "small": 80,
-        "medium": 130,
-        "large": 200,
-        "fat": 300
-      };
-
-      function randomOpacity(threshold) {
-        var opacity = Math.random();
-
-        while (opacity < threshold) {
-          opacity = Math.random();
-        }
-
-        return opacity;
-      }
-
-    })(jQuery);
-    </script>
+    <title>Versidyne.github.com by versidyne</title>
   </head>
+
   <body>
-    <div id="wrapper" class="grid clearfix">
-      <div id="main" class="grid-1">
-        <div id="logo"><h1>Versidyne Open Source</h1></div>
-        <h1>Versidyne is built on open source software.</h1>
-        <!--<p>Want to help? <a href="https://www.versidyne.com/jobs">Join the Team</a></p>
-        <p>Visit <a href="https://dev.versidyne.com/">dev.versidyne.com</a></p>
-        <p><a href="https://www.versidyne.com/about/resources">Logos and other goodies</a></p>-->
+    <header>
+      <div class="inner">
+        <h1>Versidyne.github.com</h1>
+        <h2>A listing of open source projects at Versidyne on GitHub</h2>
+        <a href="https://github.com/versidyne" class="button"><small>Follow me on</small>GitHub</a>
       </div>
+    </header>
 
-      <div class="grid grid-3">
-        <div id="statistics" class="grid-1 alpha header">
-          <h1>Statistics</h1>
-          <p>
-            <a href="https://github.com/versidyne/repositories"><span id="num-repos"><img src="assets/spinner.gif" /></span> public repos</a>
-            <br>
-            <a href="https://github.com/versidyne?tab=members"><span id="num-members"><img src="assets/spinner.gif" /></span> members</a>
-          </p>
-          <p class="email"><a href="mailto:opensource@versidyne.com">opensource@versidyne.com</a></p>
-        </div>
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h1>versidyne.github.com</h1>
 
-        <div id="recently-updated" class="grid-2 omega header">
-          <h1>Recently updated <a href="https://github.com/versidyne/repositories">View All on GitHub</a></h1>
-          <ol id="recently-updated-repos"></ol>
-        </div>
+<p>The source code of <a href="http://versidyne.github.com/">http://versidyne.github.com/</a></p>
+
+<h2>LICENSE</h2>
+
+<p>Copyright 2009-2013 Versidyne LLC</p>
+
+<p>Licensed under the XXXXX License, Version 1.0: <a href="http://www.license.com/">http://www.license.com/</a></p>
+        </section>
+
+        <aside id="sidebar">
+
+
+          <p>This page was generated by <a href="pages.github.com">GitHub Pages</a> using the Architect theme by <a href="http://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
       </div>
-
-      <ol id="repos"></ol>
     </div>
+
+  
   </body>
 </html>
