@@ -1,4 +1,11 @@
 versidyne.github.com
 ====================
 
-A listing of open source projects at Versidyne on GitHub
+The source code of http://versidyne.github.com/
+
+LICENSE
+------------
+
+Copyright 2009-2013 Versidyne LLC
+
+Licensed under the XXXXX License, Version 1.0: http://www.license.com/
